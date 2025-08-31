@@ -5,68 +5,94 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>¡Todo sobre el signo de exclamación!</title>
 <style>
-  body {
-    margin: 0;
-    height: 100vh;
-    background: #111;
-    color: #fff;
-    font-family: 'Arial', sans-serif;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-  }
-
-  .exclamacion {
-    font-size: 8rem;
-    color: #ff3d00;
-    animation: bounce 1s infinite alternate;
-  }
-
-  @keyframes bounce {
-    0% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-50px) scale(1.1); }
-    100% { transform: translateY(0) scale(1); }
-  }
-
-  .texto {
-    font-size: 1.5rem;
-    text-align: center;
-    margin-top: 20px;
-    max-width: 80%;
-    opacity: 0;
-    animation: fadeIn 2s forwards;
-    animation-delay: 1s;
-  }
-
-  @keyframes fadeIn {
-    to { opacity: 1; }
-  }
-
-  canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
+body {
+  margin: 0;
+  height: 100vh;
+  background: #111;
+  color: #fff;
+  font-family: 'Arial', sans-serif;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.slide {
+  position: absolute;
+  width: 80%;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.slide.active {
+  opacity: 1;
+}
+.exclamacion {
+  font-size: 8rem;
+  color: #ff3d00;
+  animation: bounce 1s infinite alternate;
+  margin-bottom: 20px;
+}
+@keyframes bounce {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-50px) scale(1.1); }
+  100% { transform: translateY(0) scale(1); }
+}
+.subtitulo {
+  font-size: 1.5rem;
+  background: rgba(0,0,0,0.5);
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
 </style>
 </head>
 <body>
 
 <canvas id="particles"></canvas>
 
-<div class="exclamacion">!</div>
-<div class="texto" id="texto"></div>
+<div class="slide active">
+  <div class="exclamacion">!</div>
+  <div class="subtitulo">¡Hola! Hoy aprenderemos todo sobre el signo de exclamación.</div>
+</div>
+<div class="slide">
+  <div class="exclamacion">!</div>
+  <div class="subtitulo">Su origen viene del latín 'io', que significa alegría o júbilo.</div>
+</div>
+<div class="slide">
+  <div class="exclamacion">!</div>
+  <div class="subtitulo">Se usa para expresar sorpresa, emoción o dar órdenes.</div>
+</div>
+<div class="slide">
+  <div class="exclamacion">!</div>
+  <div class="subtitulo">En español, usamos ¡ al inicio y ! al final de la frase.</div>
+</div>
+<div class="slide">
+  <div class="exclamacion">!</div>
+  <div class="subtitulo">En inglés, solo se usa al final de la frase.</div>
+</div>
+<div class="slide">
+  <div class="exclamacion">!</div>
+  <div class="subtitulo">En programación, el signo ! significa negación en muchos lenguajes.</div>
+</div>
+<div class="slide">
+  <div class="exclamacion">!</div>
+  <div class="subtitulo">¡Y eso es todo sobre el signo de exclamación!</div>
+</div>
 
 <script>
-// Partículas
+// -------------------- Partículas --------------------
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let particlesArray = [];
-
 class Particle {
   constructor(){
     this.x = Math.random() * canvas.width;
@@ -86,47 +112,46 @@ class Particle {
     ctx.fill();
   }
 }
-
 function initParticles(){
   particlesArray = [];
-  for(let i=0; i<100; i++){
+  for(let i=0; i<150; i++){
     particlesArray.push(new Particle());
   }
 }
-
 function animateParticles(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   particlesArray.forEach(p => {p.update(); p.draw();});
   requestAnimationFrame(animateParticles);
 }
-
 initParticles();
 animateParticles();
 
-// Texto animado paso a paso
-const texto = document.getElementById('texto');
-const frases = [
-  "¡Hola! Hoy aprenderemos todo sobre el signo de exclamación.",
-  "Su origen viene del latín 'io', que significa alegría o júbilo.",
-  "Se usa para expresar sorpresa, emoción o dar órdenes.",
-  "En español, usamos ¡ al inicio y ! al final de la frase.",
-  "En inglés, solo al final de la frase.",
-  "En programación, ! significa negación en muchos lenguajes.",
-  "¡Y eso es todo sobre el signo de exclamación!"
-];
-
+// -------------------- Diapositivas --------------------
+const slides = document.querySelectorAll('.slide');
 let index = 0;
 
-function mostrarFrases(){
-  if(index < frases.length){
-    texto.innerText = frases[index];
-    index++;
-    setTimeout(mostrarFrases, 3000);
+// Duración total 3:10 min = 190s -> aprox 27s por diapositiva (7 diapositivas)
+const duracionPorSlide = 27000;
+
+function mostrarSlide(){
+  slides.forEach(s => s.classList.remove('active'));
+  slides[index].classList.add('active');
+  // Voz
+  const frase = slides[index].querySelector('.subtitulo').innerText;
+  const msg = new SpeechSynthesisUtterance();
+  msg.text = frase;
+  msg.lang = 'es-ES';
+  msg.rate = 0.9;
+  msg.pitch = 1;
+  window.speechSynthesis.speak(msg);
+
+  index++;
+  if(index < slides.length){
+    setTimeout(mostrarSlide, duracionPorSlide);
   }
 }
 
-mostrarFrases();
-
+setTimeout(mostrarSlide, 1000);
 </script>
 </body>
 </html>
