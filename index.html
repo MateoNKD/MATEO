@@ -1,144 +1,132 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Página de Mateo 6-2</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      background: black;
-      color: #00ff00;
-      font-family: 'Courier New', Courier, monospace;
-      overflow: hidden;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¡Todo sobre el signo de exclamación!</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background: #111;
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
 
-    /* Canvas Matrix */
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: -1;
-    }
+  .exclamacion {
+    font-size: 8rem;
+    color: #ff3d00;
+    animation: bounce 1s infinite alternate;
+  }
 
-    /* Contenedor principal */
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-    }
+  @keyframes bounce {
+    0% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-50px) scale(1.1); }
+    100% { transform: translateY(0) scale(1); }
+  }
 
-    /* Texto animado estilo hacker */
-    .typing-text {
-      font-size: 2rem;
-      color: #00ff00;
-      text-shadow: 0 0 10px #00ff00;
-      border-right: 2px solid #00ff00;
-      white-space: nowrap;
-      overflow: hidden;
-      width: 0;
-      animation: typing 4s steps(30, end) infinite alternate,
-                 blink 0.7s infinite;
-    }
+  .texto {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-top: 20px;
+    max-width: 80%;
+    opacity: 0;
+    animation: fadeIn 2s forwards;
+    animation-delay: 1s;
+  }
 
-    @keyframes typing {
-      from { width: 0; }
-      to { width: 25ch; }
-    }
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
 
-    @keyframes blink {
-      50% { border-color: transparent; }
-    }
-
-    /* ================== NUEVO BOTÓN ================== */
-    .download-btn {
-      margin-top: 20px;
-    }
-
-    .download-btn button {
-      width: 165px;
-      height: 62px;
-      cursor: pointer;
-      color: #fff;
-      font-size: 17px;
-      border-radius: 1rem;
-      border: none;
-      position: relative;
-      background: #100720;
-      transition: 0.1s;
-    }
-
-    .download-btn button::after {
-      content: '';
-      width: 100%;
-      height: 100%;
-      background-image: radial-gradient(circle farthest-corner at 10% 20%, rgba(255,94,247,1) 17.8%, rgba(2,245,255,1) 100.2%);
-      filter: blur(15px);
-      z-index: -1;
-      position: absolute;
-      left: 0;
-      top: 0;
-    }
-
-    .download-btn button:active {
-      transform: scale(0.9) rotate(3deg);
-      background: radial-gradient(circle farthest-corner at 10% 20%, rgba(255,94,247,1) 17.8%, rgba(2,245,255,1) 100.2%);
-      transition: 0.5s;
-    }
-
-  </style>
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+</style>
 </head>
 <body>
-  <canvas id="matrix"></canvas>
-  <div class="container">
-    <div class="typing-text">El mejor grupo de la exposición...</div>
 
-    <!-- Botón de Descargar -->
-    <div class="download-btn">
-      <a href="video.mp4" download>
-        <button>Descargar</button>
-      </a>
-    </div>
-  </div>
+<canvas id="particles"></canvas>
 
-  <script>
-    // ============= ANIMACIÓN MATRIX =============
-    const canvas = document.getElementById("matrix");
-    const ctx = canvas.getContext("2d");
+<div class="exclamacion">!</div>
+<div class="texto" id="texto"></div>
 
-    canvas.height = window.innerHeight;
-    canvas.width = window.innerWidth;
+<script>
+// Partículas
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-    const letters = "01";
-    const fontSize = 16;
-    const columns = canvas.width / fontSize;
+let particlesArray = [];
 
-    const drops = [];
-    for (let x = 0; x < columns; x++) drops[x] = 1;
+class Particle {
+  constructor(){
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 3 + 1;
+    this.speedY = Math.random() * -1 - 0.5;
+    this.color = `hsl(${Math.random()*360}, 100%, 50%)`;
+  }
+  update(){
+    this.y += this.speedY;
+    if(this.y < 0) this.y = canvas.height;
+  }
+  draw(){
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI *2);
+    ctx.fill();
+  }
+}
 
-    function draw() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+function initParticles(){
+  particlesArray = [];
+  for(let i=0; i<100; i++){
+    particlesArray.push(new Particle());
+  }
+}
 
-      ctx.fillStyle = `hsl(${Math.random()*360},100%,50%)`;
-      ctx.font = fontSize + "px monospace";
+function animateParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particlesArray.forEach(p => {p.update(); p.draw();});
+  requestAnimationFrame(animateParticles);
+}
 
-      for (let i = 0; i < drops.length; i++) {
-        const text = letters.charAt(Math.floor(Math.random() * letters.length));
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+initParticles();
+animateParticles();
 
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-        drops[i]++;
-      }
-    }
+// Texto animado paso a paso
+const texto = document.getElementById('texto');
+const frases = [
+  "¡Hola! Hoy aprenderemos todo sobre el signo de exclamación.",
+  "Su origen viene del latín 'io', que significa alegría o júbilo.",
+  "Se usa para expresar sorpresa, emoción o dar órdenes.",
+  "En español, usamos ¡ al inicio y ! al final de la frase.",
+  "En inglés, solo al final de la frase.",
+  "En programación, ! significa negación en muchos lenguajes.",
+  "¡Y eso es todo sobre el signo de exclamación!"
+];
 
-    setInterval(draw, 35);
-  </script>
+let index = 0;
+
+function mostrarFrases(){
+  if(index < frases.length){
+    texto.innerText = frases[index];
+    index++;
+    setTimeout(mostrarFrases, 3000);
+  }
+}
+
+mostrarFrases();
+
+</script>
 </body>
 </html>
